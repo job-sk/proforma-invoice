@@ -1,15 +1,17 @@
-import { Directive, HostListener, Input } from '@angular/core';
+import { Directive, Input } from '@angular/core';
 
 @Directive({
   selector: '[blockKeys]',
-  standalone: true
+  standalone: true,
+  host:{
+    '(keydown)': 'onKeyDown($event)'
+  }
 })
 export class BlockKeys {
   constructor() {}
 
   @Input() blockKeys: string[] = [];
 
-  @HostListener('keydown', ['$event'])
   onKeyDown(event: KeyboardEvent) {
     if (this.blockKeys.includes(event.key)) {
       event.preventDefault();
