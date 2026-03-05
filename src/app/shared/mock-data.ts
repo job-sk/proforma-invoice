@@ -14,25 +14,27 @@ export const taxGroups = [
 ];
 
 export const invoiceItemsMock = [
+    
     {
-        item: 'Design Services',
-        description: 'UX/UI design for web dashboard',
-        unit: 'hours',
+        item: 'Office Furniture',
+        description: 'Ergonomic office chair',
+        unit: 'pcs',
+        qty: 5,
+        price: 120
+    },
+    {
+        item: 'Printer Paper',
+        description: 'A4 size multipurpose printing paper',
+        unit: 'pack',
         qty: 10,
-        price: 75
+        price: 6
     },
     {
-        item: 'Development',
-        description: 'Frontend implementation (Angular)',
-        unit: 'hours',
-        qty: 20,
-        price: 90
-    },
-    {
-        item: 'Cloud Hosting',
-        description: 'Application hosting and bandwidth',
-        unit: 'month',
-        qty: 1,
-        price: 250
+        item: 'Air Conditioner Maintenance',
+        description: 'Annual servicing and cleaning',
+        unit: 'service',
+        qty: 2,
+        price: 85
     }
+      
 ];

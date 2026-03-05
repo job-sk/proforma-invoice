@@ -14,7 +14,7 @@ export class ExpenseAllocation {
     );
 
     if (!totalAmount || !totalExpense) {
-      items.forEach(i => i.expense = 0);
+      items.forEach(i => i.allocatedExpense = 0);
       return items;
     }
 
@@ -23,7 +23,7 @@ export class ExpenseAllocation {
       const allocated =
         (item.amount / totalAmount) * totalExpense;
 
-      item.expense = Number(allocated.toFixed(2));
+      item.allocatedExpense = Number(allocated.toFixed(2));
 
     });
 

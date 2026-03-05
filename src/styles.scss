@@ -8,6 +8,7 @@
 @tailwind utilities;
 
 html {
+  overflow: hidden;
   height: 100%;
   @include mat.theme(
     (
@@ -37,6 +38,7 @@ body {
   // Reset the user agent margin.
   margin: 0;
   height: 100%;
+  overflow: auto;
 }
 /* You can add global styles to this file, and also import other style files */
 
@@ -45,3 +47,25 @@ body {
   color: #ef4444;
   font-weight: 600;
 }
+
+/* Scrollbar width */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 6px;
+}
+
+/* Scrollbar track */
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+/* Scrollbar thumb */
+::-webkit-scrollbar-thumb {
+  background: #afafaf;
+  border-radius: 6px;
+}
+
+/* Hover effect */
+// ::-webkit-scrollbar-thumb:hover {
+//   background: #bbbbbb;
+// }

@@ -5,7 +5,7 @@ export interface InvoiceItem {
     qty: number;
     price: number;
     amount: number;
-    expense: number;
+    allocatedExpense: number;
 }
 
 export interface Invoice {
@@ -18,5 +18,10 @@ export interface Invoice {
     tax: number;
     total: number;
     totalExpense: number;
+    items: InvoiceItem[];
+}
+
+export interface SavePayload {
+    invoice: Invoice;
     items: InvoiceItem[];
 }

@@ -1,293 +1,281 @@
-<div class="min-h-screen bg-slate-50 p-6">
+  <section class="p-6">
+    <!-- Invoice Details Card -->
+    <div class="bg-white rounded-lg shadow-sm border border-slate-200 p-5 mb-4">
+      <!-- Icon toolbar above header section (Invoice No, Vendor, etc.) -->
+      <div class="flex items-center gap-1.5 overflow-hidden w-fit mb-3">
+        <button type="button" class="header-toolbar-btn flex items-center px-3 py-1" (click)="fileInput.click()">
+          <mat-icon class="toolbar-icon">attach_file</mat-icon>
+          <span class="text-sm font-medium">Attach File</span>
+        </button>
+        <input type="file" class="hidden" #fileInput>
+        <button type="button" class="header-toolbar-btn p-1" title="View">
+          <mat-icon class="toolbar-icon">view_list</mat-icon>
+        </button>
+        <button type="button" class="header-toolbar-btn p-1" title="Print">
+          <mat-icon class="toolbar-icon">print</mat-icon>
+        </button>
+        <button type="button" class="header-toolbar-btn p-1" title="Document info">
+          <mat-icon class="toolbar-icon">info</mat-icon>
+        </button>
+      </div>
 
-  <!-- Page Header -->
-  <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6 mb-4">
-    <div class="flex items-center justify-between mb-6">
-      <div class="flex items-center gap-4">
-        <div class="w-12 h-12 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-xl flex items-center justify-center">
-          <mat-icon class="text-white">receipt_long</mat-icon>
+      <!-- Header section: Invoice No, Vendor, Date, etc. -->
+      <form [formGroup]="invoiceForm">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+          <!-- Invoice No -->
+          <div class="form-field">
+            <label class="form-label val-required">Invoice No</label>
+            <input
+              formControlName="invoiceNo"
+              class="form-input"
+              [class.input-invalid]="invoiceForm.get('invoiceNo')?.invalid && invoiceForm.get('invoiceNo')?.touched"
+              placeholder="INV-0001">
+            @if (invoiceForm.get('invoiceNo')?.invalid && invoiceForm.get('invoiceNo')?.touched) {
+              <span class="form-error">Invoice No is required</span>
+            }
+          </div>
+          <!-- Vendor -->
+          <div class="form-field">
+            <label class="form-label val-required">Vendor</label>
+            <select
+              formControlName="vendor"
+              class="form-select"
+              [class.input-invalid]="invoiceForm.get('vendor')?.invalid && invoiceForm.get('vendor')?.touched">
+              <option value="" disabled>Select vendor</option>
+              @for (v of vendors; track v.name) {
+                <option [value]="v.name">{{ v.name }}</option>
+              }
+            </select>
+            @if (invoiceForm.get('vendor')?.invalid && invoiceForm.get('vendor')?.touched) {
+              <span class="form-error">Vendor is required</span>
+            }
+          </div>
+          <!-- Date -->
+          <div class="form-field">
+            <label class="form-label">Date</label>
+            <input
+              type="date"
+              formControlName="date"
+              class="form-input">
+          </div>
+          <!-- Tax Group -->
+          <div class="form-field">
+            <label class="form-label val-required">Tax Group</label>
+            <select formControlName="taxGroup" class="form-select">
+              @for (tax of taxGroups; track tax.name) {
+                <option [ngValue]="tax">{{ tax.name }}</option>
+              }
+            </select>
+          </div>
+          <!-- Payment Terms -->
+          <div class="form-field">
+            <label class="form-label val-required">Payment Terms</label>
+            <select
+              formControlName="paymentTerms"
+              class="form-select"
+              [class.input-invalid]="invoiceForm.get('paymentTerms')?.invalid && invoiceForm.get('paymentTerms')?.touched">
+              <option value="">Select terms</option>
+              @for (p of paymentTerms; track p) {
+                <option [value]="p">{{ p }}</option>
+              }
+            </select>
+            @if (invoiceForm.get('paymentTerms')?.invalid && invoiceForm.get('paymentTerms')?.touched) {
+              <span class="form-error">Payment Terms is required</span>
+            }
+          </div>
         </div>
-        <div>
-          <h1 class="text-2xl font-bold text-slate-800">Proforma Invoice</h1>
-          <p class="text-sm text-slate-500">Create and manage invoice details</p>
+      </form>
+
+    </div>
+
+    <!-- Items Grid (Excel-like) -->
+    <div class="bg-white rounded-lg shadow-sm border border-slate-200 mb-4">
+      <div class="items-grid-scroll rounded-b-xl">
+        <!-- Single grid: header + all rows share same column tracks so last column always aligns -->
+        <div class="items-grid items-grid-table">
+          <!-- Row 1: Header -->
+          <div class="grid-header-cell w-10 text-center">#</div>
+          <div class="grid-header-cell">Item</div>
+          <div class="grid-header-cell">Description</div>
+          <div class="grid-header-cell">Unit</div>
+          <div
+            class="grid-header-cell text-right cursor-pointer select-none"
+            (click)="sortBy('qty')">
+            <span>Qty</span>
+            @if (sortColumn === 'qty') {
+              <mat-icon class="!text-[16px] !flex justify-center items-center">
+                {{ sortDirection === 'asc' ? 'arrow_upward' : 'arrow_downward' }}
+              </mat-icon>
+            } @else {
+              <mat-icon class="!text-[16px] !flex justify-center items-center">unfold_more</mat-icon>
+            }
+          </div>
+          <div
+            class="grid-header-cell text-right cursor-pointer select-none"
+            (click)="sortBy('price')">
+            <span>Price</span>
+            @if (sortColumn === 'price') {
+              <mat-icon class="ml-1 !text-[16px] !flex justify-center items-center">
+                {{ sortDirection === 'asc' ? 'arrow_upward' : 'arrow_downward' }}
+              </mat-icon>
+            } @else {
+              <mat-icon class="!text-[16px] !flex justify-center items-center">unfold_more</mat-icon>
+            }
+          </div>
+          <div class="grid-header-cell text-right">Amount</div>
+          <div class="grid-header-cell text-right">Expense</div>
+          <div class="grid-header-cell items-grid-actions-cell border-r-0 text-center"></div>
+          <!-- Data rows: 9 cells per row in same grid (wrapper has display:contents so grid layout unchanged) -->
+          @for (row of dataSource; track row; let i = $index) {
+            <div class="items-grid-row group contents">
+            <div class="items-grid-row-cell px-3 py-1 border-r w-10 text-center text-xs text-slate-400 font-medium flex items-center justify-center bg-slate-50/50 border-b border-slate-100">
+              {{ i + 1 }}
+            </div>
+            <div class="items-grid-row-cell border-r border-slate-100 border-b hover:bg-blue-50/30" [class.grid-cell-invalid]="row.get('item')?.invalid && row.get('item')?.touched">
+              <input
+                [formControl]="row.get('item')"
+                class="grid-cell-input"
+                placeholder="Enter item name">
+            </div>
+            <div class="items-grid-row-cell border-r border-slate-100 border-b hover:bg-blue-50/30">
+              <input
+                [formControl]="row.get('description')"
+                class="grid-cell-input"
+                placeholder="Description">
+            </div>
+            <div class="items-grid-row-cell border-r border-slate-100 border-b hover:bg-blue-50/30">
+              <input
+                [formControl]="row.get('unit')"
+                class="grid-cell-input"
+                placeholder="pcs">
+            </div>
+            <div class="items-grid-row-cell border-r border-slate-100 border-b hover:bg-blue-50/30" [class.grid-cell-invalid]="row.get('qty')?.invalid && row.get('qty')?.touched">
+              <input
+                type="number"
+                [formControl]="row.get('qty')"
+                class="grid-cell-input text-right"
+                min="1"
+                step="1"
+                [blockKeys]="['.','e','-', '+']">
+            </div>
+            <div class="items-grid-row-cell border-r border-slate-100 border-b hover:bg-blue-50/30" [class.grid-cell-invalid]="row.get('price')?.invalid && row.get('price')?.touched">
+              <input
+                type="number"
+                placeholder="0.00"
+                [formControl]="row.get('price')"
+                class="grid-cell-input text-right"
+                min="0.01"
+                step="0.01"
+                [blockKeys]="['e', '-', '+']">
+            </div>
+            <div class="items-grid-row-cell border-r px-3 py-2 text-sm text-slate-700 text-right font-medium bg-slate-50/50 border-b border-slate-100">
+              {{ row.value.amount | number:'1.2-2' }}
+            </div>
+            <div class="items-grid-row-cell border-r px-3 py-2 text-sm text-slate-700 text-right bg-slate-50/50 border-b border-slate-100">
+              {{ row.value.allocatedExpense | number:'1.2-2' }}
+            </div>
+            <div class="items-grid-actions-cell items-grid-row-cell flex items-center justify-center border-b border-slate-100 hover:bg-blue-50/30">
+              @if (dataSource.length > 1) {
+                <button
+                  class="p-1.5 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded transition-colors opacity-0 group-hover:opacity-100 cursor-pointer"
+                  (click)="removeRow(i)">
+                  <mat-icon class="text-lg">close</mat-icon>
+                </button>
+              }
+            </div>
+            </div>
+          }
         </div>
       </div>
-      <div class="flex items-center gap-3">
+      <!-- Add / Clear Buttons -->
+      <div class="p-3 bg-slate-50/50 border-t border-slate-100 flex items-center justify-between">
         <button
-          class="px-4 py-2 text-sm font-medium rounded-lg transition-colors flex items-center gap-2"
-          [class]="isFormValid() ? 'text-white bg-blue-600 hover:bg-blue-700' : 'text-slate-600 bg-slate-100 hover:bg-slate-200'"
-          (click)="exportJSON()">
-          <mat-icon class="text-lg">download</mat-icon>
-          Export JSON
+          class="flex items-center gap-2 px-4 py-2 text-sm font-medium text-blue-600 hover:text-blue-700 hover:bg-blue-50 rounded-lg transition-colors"
+          (click)="addRow()">
+          <mat-icon class="text-lg">add</mat-icon>
+          Add Item
+        </button>
+        <button
+          class="flex items-center px-3 py-2 text-xs font-medium text-slate-500 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+          type="button"
+          (click)="clearAllItems()">
+          <mat-icon class="text-base">clear_all</mat-icon>
+          Clear All
         </button>
       </div>
     </div>
 
-    <!-- Header Form -->
-    <form [formGroup]="invoiceForm">
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
-
-        <!-- Invoice No -->
-        <div class="form-field">
-          <label class="form-label val-required">Invoice No</label>
-          <input
-            formControlName="invoiceNo"
-            class="form-input"
-            [class.input-invalid]="invoiceForm.get('invoiceNo')?.invalid && invoiceForm.get('invoiceNo')?.touched"
-            placeholder="INV-0001">
-          @if (invoiceForm.get('invoiceNo')?.invalid && invoiceForm.get('invoiceNo')?.touched) {
-            <span class="form-error">Invoice No is required</span>
+    <!-- Footer Section -->
+    <div class="grid grid-cols-1 lg:grid-cols-4 gap-4 mb-4">
+      <!-- Notes -->
+      <div class="bg-white rounded-lg shadow-sm border border-slate-200 p-5 lg:col-span-2" [formGroup]="invoiceForm">
+        <h3 class="text-sm font-semibold text-slate-700 mb-3">Notes</h3>
+        <textarea
+          formControlName="notes"
+          rows="6"
+          class="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm text-slate-700 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all h-40 max-h-60 overflow-y-auto resize-none"
+          placeholder="Add any remarks or internal notes for this invoice (optional)"></textarea>
+      </div>
+      <!-- Invoice Summary with total expense -->
+      <div class="bg-white rounded-lg shadow-sm border border-slate-200 p-5 w-full lg:justify-self-end lg:col-span-2" [formGroup]="invoiceForm">
+    
+        <!-- Total Expense Input -->
+        <div class="mb-4 pb-4 border-b border-slate-200">
+          <div class="flex items-center justify-between gap-4">
+            <label class="text-sm font-medium text-slate-600 val-required">Total Expense</label>
+            <input
+              type="number"
+              formControlName="totalExpense"
+              (input)="calculateAmounts()"
+              class="form-input-sm w-32 text-right"
+              [class.input-invalid]="invoiceForm.get('totalExpense')?.invalid && invoiceForm.get('totalExpense')?.touched"
+              placeholder="0.00"
+              min="0.01"
+              step="0.01"
+              [blockKeys]="['e','-', '+']">
+          </div>
+          @if (invoiceForm.get('totalExpense')?.invalid && invoiceForm.get('totalExpense')?.touched) {
+            <span class="form-error">Total Expense must be greater than 0</span>
+          } @else {
+            <p class="text-xs text-slate-400 mt-1">Distributed proportionally across items</p>
           }
         </div>
-
-        <!-- Vendor -->
-        <div class="form-field">
-          <label class="form-label val-required">Vendor</label>
-          <select
-            formControlName="vendor"
-            class="form-select"
-            [class.input-invalid]="invoiceForm.get('vendor')?.invalid && invoiceForm.get('vendor')?.touched">
-            <option value="" disabled>Select vendor</option>
-            @for (v of vendors; track v.name) {
-              <option [value]="v.name">{{ v.name }}</option>
-            }
-          </select>
-          @if (invoiceForm.get('vendor')?.invalid && invoiceForm.get('vendor')?.touched) {
-            <span class="form-error">Vendor is required</span>
-          }
-        </div>
-
-        <!-- Date -->
-        <div class="form-field">
-          <label class="form-label">Date</label>
-          <input
-            type="date"
-            formControlName="date"
-            class="form-input">
-        </div>
-
-        <!-- Tax Group -->
-        <div class="form-field">
-          <label class="form-label val-required">Tax Group</label>
-          <select formControlName="taxGroup" class="form-select">
-            @for (tax of taxGroups; track tax.name) {
-              <option [ngValue]="tax">{{ tax.name }}</option>
-            }
-          </select>
-        </div>
-
-        <!-- Payment Terms -->
-        <div class="form-field">
-          <label class="form-label val-required">Payment Terms</label>
-          <select
-            formControlName="paymentTerms"
-            class="form-select"
-            [class.input-invalid]="invoiceForm.get('paymentTerms')?.invalid && invoiceForm.get('paymentTerms')?.touched">
-            <option value="">Select terms</option>
-            @for (p of paymentTerms; track p) {
-              <option [value]="p">{{ p }}</option>
-            }
-          </select>
-          @if (invoiceForm.get('paymentTerms')?.invalid && invoiceForm.get('paymentTerms')?.touched) {
-            <span class="form-error">Payment Terms is required</span>
-          }
-        </div>
-
-      </div>
-    </form>
-  </div>
-
-  <!-- Items Grid (Excel-like) -->
-  <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden mb-4">
-
-    <!-- Grid Header -->
-    <div class="grid grid-cols-[auto_2fr_2fr_120px_80px_150px_160px_120px_50px] bg-slate-100 border-b border-slate-200">
-      <div class="grid-header-cell w-10 text-center">#</div>
-      <div class="grid-header-cell">Item</div>
-      <div class="grid-header-cell">Description</div>
-      <div class="grid-header-cell">Unit</div>
-      <div
-        class="grid-header-cell text-right cursor-pointer select-none"
-        (click)="sortBy('qty')">
-        <span>Qty</span>
-        @if (sortColumn === 'qty') {
-          <mat-icon class="!text-[16px] !flex justify-center items-center">
-            {{ sortDirection === 'asc' ? 'arrow_upward' : 'arrow_downward' }}
-          </mat-icon>
-        } @else {
-          <mat-icon class="!text-[16px] !flex justify-center items-center">unfold_more</mat-icon>
-        }
-      </div>
-      <div
-        class="grid-header-cell text-right cursor-pointer select-none"
-        (click)="sortBy('price')">
-        <span>Price</span>
-        @if (sortColumn === 'price') {
-          <mat-icon class="ml-1 !text-[16px] !flex justify-center items-center">
-            {{ sortDirection === 'asc' ? 'arrow_upward' : 'arrow_downward' }}
-          </mat-icon>
-        } @else {
-          <mat-icon class="!text-[16px] !flex justify-center items-center">unfold_more</mat-icon>
-        }
-      </div>
-      <div class="grid-header-cell text-right">Amount</div>
-      <div class="grid-header-cell text-right">Expense</div>
-      <div class="grid-header-cell border-r-0 text-center"></div>
-    </div>
-
-    <!-- Grid Rows -->
-    @for (row of dataSource; track row; let i = $index) {
-      <div class="grid grid-cols-[auto_2fr_2fr_120px_80px_150px_160px_120px_50px] border-b border-slate-100 hover:bg-blue-50/30 transition-colors group">
-        
-        <!-- Row Number -->
-        <div class="px-3 py-1 border-r border-slate-100 w-10 text-center text-xs text-slate-400 font-medium flex items-center justify-center bg-slate-50/50">
-          {{ i + 1 }}
-        </div>
-
-        <!-- Item -->
-        <div class="border-r border-slate-100" [class.grid-cell-invalid]="row.get('item')?.invalid && row.get('item')?.touched">
-          <input
-            [formControl]="row.get('item')"
-            class="grid-cell-input"
-            placeholder="Enter item name">
-        </div>
-
-        <!-- Description -->
-        <div class="border-r border-slate-100">
-          <input
-            [formControl]="row.get('description')"
-            class="grid-cell-input"
-            placeholder="Description">
-        </div>
-
-        <!-- Unit -->
-        <div class="border-r border-slate-100">
-          <input
-            [formControl]="row.get('unit')"
-            class="grid-cell-input"
-            placeholder="pcs">
-        </div>
-
-        <!-- Qty -->
-        <div class="border-r border-slate-100" [class.grid-cell-invalid]="row.get('qty')?.invalid && row.get('qty')?.touched">
-          <input
-            type="number"
-            [formControl]="row.get('qty')"
-            class="grid-cell-input text-right"
-            min="1">
-        </div>
-
-        <!-- Price -->
-        <div class="border-r border-slate-100" [class.grid-cell-invalid]="row.get('price')?.invalid && row.get('price')?.touched">
-          <input
-            type="number"
-            placeholder="0.00"
-            [formControl]="row.get('price')"
-            class="grid-cell-input text-right"
-            min="0.01"
-            step="0.01">
-        </div>
-
-        <!-- Amount (computed) -->
-        <div class="border-r border-slate-100 px-3 py-2 text-sm text-slate-700 text-right font-medium bg-slate-50/50">
-          {{ row.value.amount | number:'1.2-2' }}
-        </div>
-
-        <!-- Expense (computed) -->
-        <div class="border-r border-slate-100 px-3 py-2 text-sm text-slate-700 text-right bg-slate-50/50">
-          {{ row.value.expense | number:'1.2-2' }}
-        </div>
-
-        <!-- Actions -->
-        <div class="flex items-center justify-center">
-          @if (dataSource.length > 1) {
-            <button
-              class="p-1.5 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded transition-colors opacity-0 group-hover:opacity-100 cursor-pointer"
-              (click)="removeRow(i)">
-              <mat-icon class="text-lg">close</mat-icon>
-            </button>
-          }
-        </div>
-
-      </div>
-    }
-
-    <!-- Add / Clear Buttons -->
-    <div class="p-3 bg-slate-50/50 border-t border-slate-100 flex items-center justify-between">
-      <button
-        class="flex items-center gap-2 px-4 py-2 text-sm font-medium text-blue-600 hover:text-blue-700 hover:bg-blue-50 rounded-lg transition-colors"
-        (click)="addRow()">
-        <mat-icon class="text-lg">add</mat-icon>
-        Add Item
-      </button>
-      <button
-        class="flex items-center px-3 py-2 text-xs font-medium text-slate-500 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-        type="button"
-        (click)="clearAllItems()">
-        <mat-icon class="text-base">clear_all</mat-icon>
-        Clear All
-      </button>
-    </div>
-
-  </div>
-
-  <!-- Footer Section -->
-  <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
-
-    <!-- Notes -->
-    <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-5 lg:col-span-2" [formGroup]="invoiceForm">
-      <h3 class="text-sm font-semibold text-slate-700 mb-3">Notes</h3>
-      <textarea
-        formControlName="notes"
-        rows="6"
-        class="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm text-slate-700 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all h-40 max-h-60 overflow-y-auto resize-none"
-        placeholder="Add any remarks or internal notes for this invoice (optional)"></textarea>
-    </div>
-
-    <!-- Invoice Summary with Total Expense -->
-    <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-5 w-full max-w-md lg:justify-self-end" [formGroup]="invoiceForm">
-      
-      <!-- Total Expense Input -->
-      <div class="mb-4 pb-4 border-b border-slate-200">
-        <div class="flex items-center justify-between gap-4">
-          <label class="text-sm font-medium text-slate-600 val-required">Total Expense</label>
-          <input
-            type="number"
-            formControlName="totalExpense"
-            (input)="calculateAmounts()"
-            class="form-input-sm w-32 text-right"
-            [class.input-invalid]="invoiceForm.get('totalExpense')?.invalid && invoiceForm.get('totalExpense')?.touched"
-            placeholder="0.00"
-            min="0.01"
-            step="0.01">
-        </div>
-        @if (invoiceForm.get('totalExpense')?.invalid && invoiceForm.get('totalExpense')?.touched) {
-          <span class="form-error">Total Expense must be greater than 0</span>
-        } @else {
-          <p class="text-xs text-slate-400 mt-1">Distributed proportionally across items</p>
-        }
-      </div>
-
-      <!-- Invoice Summary -->
-      <h3 class="text-sm font-semibold text-slate-700 mb-3">Invoice Summary</h3>
-      <div class="space-y-2.5">
-        <div class="flex justify-between items-center">
-          <span class="text-slate-500 text-sm">Subtotal</span>
-          <span class="text-base font-medium text-slate-700">{{ subTotal() | number:'1.2-2' }}</span>
-        </div>
-        <div class="flex justify-between items-center">
-          <span class="text-slate-500 text-sm">Tax ({{ invoiceForm.value.taxGroup?.name }})</span>
-          <span class="text-base font-medium text-slate-700">{{ tax() | number:'1.2-2' }}</span>
-        </div>
-        <div class="border-t border-slate-200 pt-3 mt-3">
+        <!-- Invoice Summary -->
+        <h3 class="text-sm font-semibold text-slate-700 mb-3">Invoice Summary</h3>
+        <div class="space-y-2.5">
           <div class="flex justify-between items-center">
-            <span class="text-slate-700 font-semibold">Total</span>
-            <span class="text-2xl font-bold text-emerald-600">{{ total() | number:'1.2-2' }}</span>
+            <span class="text-slate-500 text-sm">Subtotal</span>
+            <span class="text-base font-medium text-slate-700">{{ subTotal() | number:'1.2-2' }}</span>
+          </div>
+          <div class="flex justify-between items-center">
+            <span class="text-slate-500 text-sm">Tax ({{ invoiceForm.value.taxGroup?.name }})</span>
+            <span class="text-base font-medium text-slate-700">{{ tax() | number:'1.2-2' }}</span>
+          </div>
+          <div class="border-t border-slate-200 pt-3 mt-3">
+            <div class="flex justify-between items-center">
+              <span class="text-slate-700 font-semibold">Total</span>
+              <span class="text-2xl font-bold text-emerald-600">{{ total() | number:'1.2-2' }}</span>
+            </div>
           </div>
         </div>
       </div>
     </div>
 
-  </div>
-
-</div>
+    <!--save, download, print buttons -->
+    <div class="flex items-center justify-end gap-2">
+      <button
+        class="form-button"
+        [disabled]="!isFormValid()"
+        (click)="saveInvoice()">
+        <mat-icon class="text-lg !flex justify-center items-center">save</mat-icon>
+        Save
+      </button>
+      <button
+        [disabled]="!isFormValid()"
+        class="form-button"
+        (click)="downloadInvoiceJSON()">
+        <mat-icon class="text-lg !flex justify-center items-center">download</mat-icon>
+        Download
+      </button>
+    </div>
+  </section>

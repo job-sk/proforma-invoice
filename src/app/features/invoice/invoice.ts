@@ -7,10 +7,11 @@ import { ExpenseAllocation } from '../../core/services/expense-allocation';
 import { InvoiceItem } from '../../core/models/invoice.model';
 import { distinctUntilChanged } from 'rxjs/operators';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { BlockKeys } from '../../shared/directives/block-keys';
 
 @Component({
   selector: 'app-invoice',
-  imports: [ReactiveFormsModule, MatIconModule, DecimalPipe],
+  imports: [ReactiveFormsModule, MatIconModule, DecimalPipe, BlockKeys],
   templateUrl: './invoice.html',
   styleUrl: './invoice.scss',
 })
@@ -69,7 +70,7 @@ export class Invoice implements OnInit{
     }
   }
 
-  ngOnInit() {
+  ngOnInit(): void {
     console.log('items',this.invoiceForm.controls.items.value);
   }
 
@@ -86,7 +87,7 @@ export class Invoice implements OnInit{
       qty: [initial?.qty ?? 1, [Validators.required, Validators.min(1)]],
       price: [initial?.price ?? null, [Validators.required, Validators.min(0.01)]],
       amount: [0],
-      expense: [0]
+      allocatedExpense: [initial?.allocatedExpense ?? 0]
     });
   
     // // listen only to fields that affect calculation
@@ -150,7 +151,7 @@ export class Invoice implements OnInit{
         qty,
         price,
         amount,
-        expense: raw.expense ?? 0
+        allocatedExpense: raw.allocatedExpense ?? 0
       };
 
     });
@@ -164,13 +165,13 @@ export class Invoice implements OnInit{
 
     allocated.forEach((item, index) => {
       this.items.at(index).patchValue(
-        { expense: item.expense },
+        { allocatedExpense: item.allocatedExpense },
         { emitEvent: false }
       );
     });
   }
 
-  private refreshTable() {
+  private refreshTable(): void {
     this.dataSource = [...this.items.controls];
   }
 
@@ -214,7 +215,7 @@ export class Invoice implements OnInit{
     return this.invoiceForm.valid && this.items.length > 0 && this.items.controls.every(c => c.valid);
   }
 
-  exportJSON() {
+  getInvoiceFinalData() {
     this.invoiceForm.markAllAsTouched();
     this.items.controls.forEach(c => c.markAllAsTouched());
 
@@ -222,13 +223,18 @@ export class Invoice implements OnInit{
       alert('Please fill all the required fields');
       return;
     }
-
-    const data = {
+    const invoiceData = {
       ...this.invoiceForm.value,
       subtotal: this.subTotal(),
       tax: this.tax(),
       total: this.total()
     };
+    return invoiceData;
+  }
+
+  downloadInvoiceJSON(): void {
+    const data = this.getInvoiceFinalData();
+    if (!data) return;
     console.log(data);
 
     const blob = new Blob(
@@ -241,5 +247,13 @@ export class Invoice implements OnInit{
     link.download = 'invoice.json';
     link.click();
   }
+  
+  saveInvoice(): void {
+    const invoiceData = this.getInvoiceFinalData();
+    if (!invoiceData) return;
+    console.log('Invoice json', invoiceData);
+  }
+  
+  
 
 }

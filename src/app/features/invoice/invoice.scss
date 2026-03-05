@@ -1,9 +1,55 @@
+.header-toolbar-btn {
+  @apply transition-colors cursor-pointer text-slate-500 rounded border border-gray-200 hover:bg-slate-100;
+
+  .toolbar-icon {
+    @apply justify-center items-center;
+    display: flex !important;
+    font-size: 20px !important;
+  }
+}
+
 .grid-cell-input {
-  @apply w-full h-full px-3 py-2 text-sm text-slate-700 bg-transparent border-0 focus:outline-none focus:bg-blue-50 transition-colors;
+  @apply w-full h-full min-w-0 px-3 py-2 text-sm text-slate-700 bg-transparent border-0 focus:outline-none focus:bg-blue-50 transition-colors;
+}
+
+.items-grid-scroll {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: auto;
+  overflow-y: visible;
+  -webkit-overflow-scrolling: touch;
+}
+
+.items-grid {
+  display: grid;
+  grid-template-columns: 40px minmax(120px, 2fr) minmax(160px, 2fr) 120px 80px 150px 160px 120px 56px;
+  min-width: 936px;
+
+  /* Last column (Actions): fixed width so it doesn’t get cut off on small screens */
+  .items-grid-actions-cell {
+    min-width: 56px;
+    max-width: 56px;
+    box-sizing: border-box;
+  }
+}
+
+/* Single-grid table: header + all rows share same tracks so last column always aligns */
+.items-grid-table {
+  > .grid-header-cell:nth-child(-n + 9) {
+    @apply bg-slate-100 border-b border-slate-200;
+  }
+
+  .items-grid-row-cell {
+    min-width: 0;
+  }
 }
 
 .grid-header-cell {
   @apply px-3 py-3 text-xs font-semibold text-slate-600 uppercase tracking-wide border-r border-slate-200 flex items-center justify-center;
+
+  &.text-right {
+    justify-content: flex-end;
+  }
 }
 
 .form-field {
@@ -36,4 +82,8 @@
 
 .grid-cell-invalid {
   @apply bg-red-50;
+}
+
+.form-button {
+  @apply flex items-center justify-center rounded-md px-3 py-1.5 bg-blue-50 text-gray-500 border border-blue-200 shadow hover:shadow-md transition-colors disabled:border-gray-200 disabled:bg-slate-50 disabled:text-gray-400;
 }
