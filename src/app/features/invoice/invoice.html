@@ -265,13 +265,11 @@
     <div class="flex items-center justify-end gap-2">
       <button
         class="form-button"
-        [disabled]="!isFormValid()"
         (click)="saveInvoice()">
         <mat-icon class="text-lg !flex justify-center items-center">save</mat-icon>
         Save
       </button>
       <button
-        [disabled]="!isFormValid()"
         class="form-button"
         (click)="downloadInvoiceJSON()">
         <mat-icon class="text-lg !flex justify-center items-center">download</mat-icon>

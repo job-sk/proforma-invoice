@@ -251,6 +251,7 @@ export class Invoice implements OnInit{
   saveInvoice(): void {
     const invoiceData = this.getInvoiceFinalData();
     if (!invoiceData) return;
+    alert('Invoice saved successfully');
     console.log('Invoice json', invoiceData);
   }
   
