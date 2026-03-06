@@ -30,7 +30,7 @@ export class Invoice implements OnInit{
     date: [''],
     taxGroup: [taxGroups[0], Validators.required],
     paymentTerms: ['', Validators.required],
-    totalExpense: [null, [Validators.required, Validators.min(0.01)]],
+    totalExpense: [null, Validators.min(0)],
     notes: [''],
     items: this.formBuilder.array([])
   });
